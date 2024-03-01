@@ -99,7 +99,7 @@ class DNDLoginProps(bpy.types.PropertyGroup):
     bl_idname = "config.id"
     server_ip: StringProperty(
         name="",
-        default="ws://146.185.158.78:1337",
+        default="146.185.158.78",
         description="Server IP"
     )
     room_id: StringProperty(
@@ -163,7 +163,7 @@ class ConnectServer(bpy.types.Operator):
         if sio.connected:
             sio.emit('leave', { 'room_id': login.room_id})
         else:
-            sio.connect(login.server_ip)
+            sio.connect('ws://'+login.server_ip+':1337')
         sio.emit('join', { 'room_id': login.room_id})
         on_depsgraph_update.operator = None
         bpy.app.handlers.depsgraph_update_post.append(on_depsgraph_update)
