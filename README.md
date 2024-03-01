@@ -3,7 +3,7 @@ D&amp;D plugin for blender. Synchronize object transforms in a scene between mul
 
 ## Prerequisites
 ```
-pip install pip install "python-socketio[client]"
+pip install "python-socketio[client]"
 ```
 
 ## Installation
