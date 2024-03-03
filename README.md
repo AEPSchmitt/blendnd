@@ -19,7 +19,7 @@ pip install "python-socketio[client]"
 
 ## Disclaimer
 This is still very much an early prototype. No sharing of models between connected players, only support of simple transforms of existing models is currently implemented.
-Obly tested on Linux.
+Only tested on Linux.
 
 ## Known issues
 Multiple models with the same name in your scene cause problems.
