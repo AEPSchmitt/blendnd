@@ -1,6 +1,9 @@
 # blendnd
 D&amp;D plugin for blender. Join a room to synchronize object transforms with other people in the same room.
 
+![dnd-addon](https://github.com/AEPSchmitt/blendnd/assets/9079958/bdcf92f9-5cb6-4995-9773-47b28ee30ad9)
+
+
 ## Prerequisites
 ```
 pip install "python-socketio[client]"
