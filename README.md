@@ -1,8 +1,9 @@
 # blendnd
-D&amp;D plugin for blender. Join a room to synchronize object transforms with other people in the same room.
+D&amp;D plugin for blender.
 
 ![dnd-addon](https://github.com/AEPSchmitt/blendnd/assets/9079958/bdcf92f9-5cb6-4995-9773-47b28ee30ad9)
 
+Join a room to synchronize object transforms with other people in the same room.
 
 ## Prerequisites
 ```
