@@ -25,6 +25,8 @@ pip install "python-socketio[client]"
 
 ## Disclaimer
 This is still very much an early prototype. Only transformations are shared with the room, not the addition or removal of models (yet). That means you will have to share the blender scene with all players beforehand.
+
+
 Defaults to my socket managing server, but you can use **server.py** to set up your own and change the connection in the **Settings** menu.
 
 ## Known issues
