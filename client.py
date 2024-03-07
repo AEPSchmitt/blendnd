@@ -104,7 +104,7 @@ class DNDLoginProps(bpy.types.PropertyGroup):
     )
     room_id: StringProperty(
         name="",
-        default="( enter room id )",
+        default="( room key )",
         description="Enter room name"
     )
     player_name = StringProperty(
@@ -114,7 +114,7 @@ class DNDLoginProps(bpy.types.PropertyGroup):
     )
     
 class ConnectionPanel(bpy.types.Panel):
-    bl_label = "Connection"
+    bl_label = "ROOM"
     bl_idname = "dnd.connect"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -126,18 +126,17 @@ class ConnectionPanel(bpy.types.Panel):
         login = get_dnd_login_properties()
         
         row = layout.row()
-        row.label(icon="RNA", text="IP")
-        row.prop(login, "server_ip")
-        
-        row = layout.row()
         row.label(icon="KEYINGSET")
         row.prop(login, "room_id")
         
         row = layout.row()
-        row.operator("server.start", icon="PLAY", text="connect")
+        row.operator("server.start", icon="PLAY", text="Enter")
         
         row = layout.row()
-        row.operator("server.stop", icon="CANCEL")
+        row.operator("server.stop", icon="CANCEL", text="Leave")
+        
+        row = layout.row()
+        row.operator("server.custom", icon="RNA", text="Settings")
         
         
 class ActionPanel(bpy.types.Panel):
@@ -152,6 +151,20 @@ class ActionPanel(bpy.types.Panel):
         row = layout.row()
         row.label(icon="ORIENTATION_CURSOR", text="CONNECTED")
         #row.operator("server.ping")
+        
+class IPanel(bpy.types.Panel):
+    bl_label = "Host"
+    bl_idname = "dnd_ip"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "D&D"
+    
+    def draw(self, context):
+        login = get_dnd_login_properties()
+        layout = self.layout
+        row = layout.row()
+        row.label(icon="RNA", text="Host:")
+        row.prop(login, "server_ip")
     
 class ConnectServer(bpy.types.Operator):
     bl_idname = "server.start"
@@ -168,7 +181,16 @@ class ConnectServer(bpy.types.Operator):
         on_depsgraph_update.operator = None
         bpy.app.handlers.depsgraph_update_post.append(on_depsgraph_update)
         return {'FINISHED'}
+
+class OpenCustomIP(bpy.types.Operator):
+    bl_idname = "server.custom"
+    bl_label = "settings"
+    bl_description="Settings"
     
+    def execute(self, context):
+        bpy.utils.register_class(IPanel)
+        return {'FINISHED'}
+
 class DisconnectServer(bpy.types.Operator):
     bl_idname = "server.stop"
     bl_label = "disconnect"
@@ -209,6 +231,7 @@ class PlayerPanel(bpy.types.Panel):
 classes = (
     ConnectServer,
     DisconnectServer,
+    OpenCustomIP,
     PingServer,
     DNDLoginProps,
     ConnectionPanel,
@@ -225,6 +248,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
         
     bpy.utils.unregister_class(ActionPanel)
+    bpy.utils.unregister_class(IPanel)
         
 if __name__ == "__main__":
     register()
