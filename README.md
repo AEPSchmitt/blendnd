@@ -11,7 +11,7 @@ pip install "python-socketio[client]"
 ```
 
 ## Installation
-0. Install **socketio** and ensure Blender has access to the package (this may be an issue, depending on how you installed Blender)
+0. Install [**socketio**](https://python-socketio.readthedocs.io/en/stable/client.html) and ensure Blender has access to the package (this may be an issue, depending on how you installed Blender)
 1. Download [**blendnd-plugin.zip**](https://github.com/AEPSchmitt/blendnd/blob/main/blendnd-plugin.zip) 
 2. Open Blender
 3. Go to **Edit > Preferences > Add-ons** and select **Install**
@@ -26,5 +26,4 @@ pip install "python-socketio[client]"
 This is still very much an early prototype. Only transformations are shared with the room, not the addition or removal of models (yet). That means you will have to share the blender scene with all players beforehand.
 
 ## Known issues
-Multiple models with the same name in your scene cause problems.
 Setting up your Python environment to access socketio may take more steps if you installed Blender through Steam.
