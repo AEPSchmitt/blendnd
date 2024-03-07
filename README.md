@@ -14,7 +14,7 @@ pip install "python-socketio[client]"
 0. Install [**socketio**](https://python-socketio.readthedocs.io/en/stable/client.html) and ensure Blender has access to the package (this may be an issue, depending on how you installed Blender)
 1. Download [**blendnd-plugin.zip**](https://github.com/AEPSchmitt/blendnd/blob/main/blendnd-plugin.zip) 
 2. Open Blender
-3. Go to **Edit > Preferences > Add-ons** and select **Install**
+3. Go to **Edit > Preferences > Add-ons** and select **Install** ( [guide](https://www.youtube.com/watch?v=vYh1qh9y1MI) )
 4. Navigate to and select **blendnd-pluging.zip**
 5. Remember to enable the add-on after adding it
 6. Open the same blender file as the rest of your group (a scenario created by your DM)
