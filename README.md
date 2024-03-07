@@ -23,8 +23,7 @@ pip install "python-socketio[client]"
 9. Play!
 
 ## Disclaimer
-This is still very much an early prototype. No sharing of models between connected players, only support of simple transforms of existing models is currently implemented.
-Only tested on Linux.
+This is still very much an early prototype. Only transformations are shared with the room, not the addition or removal of models (yet). That means you will have to share the blender scene with all players beforehand.
 
 ## Known issues
 Multiple models with the same name in your scene cause problems.
