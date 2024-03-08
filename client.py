@@ -3,7 +3,8 @@ import socketio
 
 from mathutils import Vector
 from bpy.props import (StringProperty,
-                        PointerProperty)
+                        PointerProperty,
+                        EnumProperty)
 
 
 bl_info = {
@@ -26,6 +27,8 @@ bl_info = {
 PLUGIN_VERSION = str(bl_info['version']).strip('() ').replace(',', '.')
 is_plugin_enabled = False
 
+group = []
+
 class Config:
     ADDON_NAME = 'dnd_plugin'
     GITHUB_REPOSITORY_URL = 'https://github.com/AEPSchmitt/blendnd'
@@ -34,7 +37,7 @@ class Config:
 sio = socketio.Client()
 @sio.event
 def connect():
-    bpy.utils.register_class(ActionPanel)
+    bpy.utils.register_class(RoomPanel)
     print("Connected to the server")
 
 # Define an event handler for the 'message' event
@@ -43,7 +46,28 @@ def message(data):
     print(f"Message from the server: {data}")
     #bpy.ops.mesh.primitive_uv_sphere_add(radius=1, location=(0, 0, 0))
     #bpy.context.view_layer.update()
+    
+@sio.event
+def user_list(data):
+    group.clear()
+    i = 0
+    for d in data:
+        group.append(('test', d, 'player '+str(i)))
+        i += 1
+      
+@sio.event
+def player_joined(data):
+    if data:
+        group.append((data['id'], data['id'], "player"))
 
+@sio.event
+def player_left(data):
+    if data:
+        for i in group:
+            if group[i][0] == data['id']:
+                group.remove(group[i])
+                break
+        
 @sio.event
 def action(data):
     if data:
@@ -57,7 +81,7 @@ def action(data):
 # Define an event handler for the 'disconnect' event
 @sio.event
 def disconnect():
-    bpy.utils.unregister_class(ActionPanel)
+    bpy.utils.unregister_class(RoomPanel)
     print("Disconnected from the server")
     
 # helpers
@@ -102,19 +126,44 @@ class DNDLoginProps(bpy.types.PropertyGroup):
         default="146.185.158.78",
         description="Server IP"
     )
+    server_port: StringProperty(
+        name="",
+        default="1337",
+        description="Server port"
+    )
     room_id: StringProperty(
         name="",
-        default="( room key )",
+        default="( choose key )",
         description="Enter room name"
     )
-    player_name = StringProperty(
+
+def get_players(self, context):
+    return group
+
+def get_room_info():
+    return bpy.context.window_manager.room_info
+
+def player_chosen(self):
+    print(self)
+    
+class RoomProps(bpy.types.PropertyGroup):
+    bl_idname = "room.info"
+    players : EnumProperty(
         name="",
-        default="( choose name )",
+        items=get_players,
+        description="Players in room"
+    )
+    player_name : StringProperty(
+        name="",
+        default="Kaladin",
         description="Enter your name"
     )
-    
+
+def get_id():
+    return sio.sid
+
 class ConnectionPanel(bpy.types.Panel):
-    bl_label = "ROOM"
+    bl_label = "D&D Rooms"
     bl_idname = "dnd.connect"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -136,22 +185,51 @@ class ConnectionPanel(bpy.types.Panel):
         row.operator("server.stop", icon="CANCEL", text="Leave")
         
         row = layout.row()
-        row.operator("server.custom", icon="RNA", text="Settings")
+        row.operator("server.custom", icon="MODIFIER", text="Settings")
         
         
-class ActionPanel(bpy.types.Panel):
-    bl_label = "Actions"
+        
+class RoomPanel(bpy.types.Panel):
+    bl_label = "Room"
     bl_idname = "dnd_act"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "D&D"
     
     def draw(self, context):
+        room = get_room_info()
+        
         layout = self.layout
         row = layout.row()
-        row.label(icon="ORIENTATION_CURSOR", text="CONNECTED")
+        row.label(text="Your name:")
+        row = layout.row()
+        row.prop(room, "player_name")
+        row.operator("room.changename", text="change")
+        #row.label(text="CONNECTED")
+        #row.label(icon="ORIENTATION_CURSOR")
+        
+        
+        row = layout.row()
+        row.label(text="Players:")
+        row = layout.row()
+        row.prop(room, "players")
         #row.operator("server.ping")
         
+        #row = layout.row()
+        #row.label(text="Your ID:")
+        #row.label(text=sio.sid)
+
+class ChangeName(bpy.types.Operator):
+    bl_idname = "room.changename"
+    bl_label = "change name"
+    bl_description="Change Name"
+    
+    def execute(self, context):
+        login = get_dnd_login_properties()
+        room = get_room_info()
+        sio.emit('join', { 'room_id': login.room_id, 'name' : room.player_name})
+        return {'FINISHED'}
+    
 class IPanel(bpy.types.Panel):
     bl_label = "Host"
     bl_idname = "dnd_ip"
@@ -163,8 +241,11 @@ class IPanel(bpy.types.Panel):
         login = get_dnd_login_properties()
         layout = self.layout
         row = layout.row()
-        row.label(icon="RNA", text="Host:")
+        row.label(icon="LIBRARY_DATA_DIRECT", text="IP:")
         row.prop(login, "server_ip")
+        row = layout.row()
+        row.label(icon="SNAP_FACE_NEAREST", text="port:")
+        row.prop(login, "server_port")
     
 class ConnectServer(bpy.types.Operator):
     bl_idname = "server.start"
@@ -173,16 +254,18 @@ class ConnectServer(bpy.types.Operator):
     
     def execute(self, context):
         login = get_dnd_login_properties()
+        room = get_room_info()
+        
         if sio.connected:
             sio.emit('leave', { 'room_id': login.room_id})
         else:
-            sio.connect('ws://'+login.server_ip+':1337')
-        sio.emit('join', { 'room_id': login.room_id})
+            sio.connect('ws://'+login.server_ip+':'+login.server_port)
+        sio.emit('join', { 'room_id': login.room_id, 'name' : room.player_name})
         on_depsgraph_update.operator = None
         bpy.app.handlers.depsgraph_update_post.append(on_depsgraph_update)
         return {'FINISHED'}
 
-class OpenCustomIP(bpy.types.Operator):
+class OpenSettings(bpy.types.Operator):
     bl_idname = "server.custom"
     bl_label = "settings"
     bl_description="Settings"
@@ -198,6 +281,7 @@ class DisconnectServer(bpy.types.Operator):
     
     def execute(self, context):
         sio.disconnect()
+        group = []
         if on_depsgraph_update in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(on_depsgraph_update)
         return {'FINISHED'}
@@ -212,42 +296,26 @@ class PingServer(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class PlayerPanel(bpy.types.Panel):
-    bl_label = "Players"
-    bl_idname = "player.list"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "D&D"
-    
-    def draw(self, context):
-        layout = self.layout
-
-    def add_player(self, name):
-        layout = self.layout
-        row = layout.row()
-        row.operator(text=name)
-
-
 classes = (
     ConnectServer,
     DisconnectServer,
-    OpenCustomIP,
+    OpenSettings,
+    ChangeName,
     PingServer,
     DNDLoginProps,
-    ConnectionPanel,
-    #ActionPanel
+    RoomProps,
+    ConnectionPanel
 )
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.WindowManager.dnd_properties = PointerProperty(type=DNDLoginProps)
+    bpy.types.WindowManager.room_info = PointerProperty(type=RoomProps)
         
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-        
-    bpy.utils.unregister_class(ActionPanel)
     bpy.utils.unregister_class(IPanel)
         
 if __name__ == "__main__":
