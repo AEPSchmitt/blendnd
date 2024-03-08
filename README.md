@@ -18,10 +18,12 @@ pip install "python-socketio[client]"
 3. Go to **Edit > Preferences > Add-ons** and select **Install** ( [guide](https://www.youtube.com/watch?v=vYh1qh9y1MI) )
 4. Navigate to and select **blendnd-pluging.zip**
 5. Remember to enable the add-on after adding it
+
+
    ![image](https://github.com/AEPSchmitt/blendnd/assets/9079958/730ab2c3-20bc-4898-819d-82e73d00fa20)
 6. Open the same blender file as the rest of your group (a scenario created by your DM)
 7. Open the **D&D** plugin menu (right side of the Viewport - you may need to click the little arrow next to the XYZ gizmo)
-8. Enter the same room code as your D&D group and click **connect** (leave **IP** as is unless you want to use your own server)
+8. Enter the same room code as your D&D group and click **connect**
 9. Play!
 
 ## Disclaimer
