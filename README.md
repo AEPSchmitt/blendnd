@@ -34,3 +34,8 @@ Defaults to my socket managing server, but you can use **server.py** to set up y
 
 ## Known issues
 Setting up your Python environment to access socketio may take more steps if you installed Blender through Steam.
+
+## Planned features
+- Multi-object transforms
+- Character Sheets
+- Dice rolling
