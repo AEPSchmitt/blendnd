@@ -2,7 +2,7 @@ import socketio
 import eventlet
 import time
 
-IP = "localhost"
+IP = "localhost" # Change this
 PORT = 1337
 
 # Create a new Socket.IO server
@@ -67,7 +67,7 @@ def leave(sid, data):
     for room, users in room_user_mapping.items():
         if sid in users:
             room_user_mapping[room].pop(sid)
-            sio.emit('user_list', list(users), room=room)
+            sio.emit('user_list', list(room_user_mapping[room].values()), room=room)
 
 # Define an event handler for the 'disconnect' event
 @sio.event
@@ -76,7 +76,7 @@ def disconnect(sid):
     for room, users in room_user_mapping.items():
         if sid in users:
             room_user_mapping[room].pop(sid)
-            sio.emit('user_list', list(users), room=room)
+            sio.emit('user_list', list(room_user_mapping[room].values()), room=room)
 
 # Create the application instance
 app = socketio.WSGIApp(sio)
