@@ -2,10 +2,12 @@ import socketio
 import eventlet
 import time
 
+IP = "localhost"
 PORT = 1337
 
 # Create a new Socket.IO server
 sio = socketio.Server(cors_allowed_origins="*")
+room_user_mapping = {}
 
 count = 0
 # Define an event handler for the 'message' event
@@ -27,7 +29,6 @@ def getplayers(sid, data):
     print(clients)
     sio.emit('players', clients)
 
-
 @sio.event
 def action(sid, data):
     print(f"Move from {sid}: {data}")
@@ -42,25 +43,40 @@ def connect(sid, environ):
 @sio.event
 def join(sid, data):
     print(f"User {sid} joining room {data['room_id']}")
-    sio.enter_room(sid, data['room_id'])
-    sio.emit('player_joined', {'id' : sid}, room=data['room_id'], skip_sid=sid)
+    room = data['room_id']
+    username = data['name']
+    sio.enter_room(sid, room)
+
+    # Add user to the room_user_mapping with username
+    if room not in room_user_mapping:
+        room_user_mapping[room] = {}
+    room_user_mapping[room][sid] = username
+
+    # Broadcast the updated user list to all clients in the room
+    sio.emit('user_list', list(room_user_mapping[room].values()), room=room)
+
+@sio.event
+def change_name(sid, data):
+    print(f"User {sid} changing name to {data['name']}")
+    sio.emit('namechange', {'id' : sid, 'name' : data['name']}, room=data['room_id'], skip_sid=sid)
 
 @sio.event
 def leave(sid, data):
     print(f"User {sid} left room {data['room_id']}")
     sio.leave_room(sid, data['room_id'])
-    sio.emit('player_left', {'id' : sid}, room=data['room_id'], skip_sid=sid)
+    for room, users in room_user_mapping.items():
+        if sid in users:
+            room_user_mapping[room].pop(sid)
+            sio.emit('user_list', list(users), room=room)
 
 # Define an event handler for the 'disconnect' event
 @sio.event
 def disconnect(sid):
     print(f"Client disconnected: {sid}")
-
-# Define a function to send a message to all connected clients
-def send_message_to_all():
-    message = "Server broadcast: Hello, clients!"
-    print('broadcasting ping')
-    sio.send(None, message)  # Broadcast to all connected clients
+    for room, users in room_user_mapping.items():
+        if sid in users:
+            room_user_mapping[room].pop(sid)
+            sio.emit('user_list', list(users), room=room)
 
 # Create the application instance
 app = socketio.WSGIApp(sio)
@@ -68,4 +84,4 @@ app = socketio.WSGIApp(sio)
 # Run the server
 if __name__ == "__main__":
     # Use eventlet as the web server
-    eventlet.wsgi.server(eventlet.listen(("localhost", PORT)), app)
+    eventlet.wsgi.server(eventlet.listen((IP, PORT)), app)
