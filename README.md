@@ -7,12 +7,12 @@ D&amp;D plugin for blender.
 Join a room to synchronize object transforms with other people in the same room. Designed for virtual D&D but can also be used for other games. Download [**chess_test_scene.blend**](https://github.com/AEPSchmitt/blendnd/blob/main/chess_test_scene.blend) to try the addon with a game of chess.
 
 ## Prerequisites
+0. Install [**socketio**](https://python-socketio.readthedocs.io/en/stable/client.html) and ensure Blender has access to the package (this may be an issue, depending on how you installed Blender)
 ```
 pip install "python-socketio[client]"
 ```
 
 ## Installation
-0. Install [**socketio**](https://python-socketio.readthedocs.io/en/stable/client.html) and ensure Blender has access to the package (this may be an issue, depending on how you installed Blender)
 1. Download [**blendnd-plugin.zip**](https://github.com/AEPSchmitt/blendnd/blob/main/blendnd-plugin.zip) 
 2. Open Blender
 3. Go to **Edit > Preferences > Add-ons** and select **Install** ( [guide](https://www.youtube.com/watch?v=vYh1qh9y1MI) )
