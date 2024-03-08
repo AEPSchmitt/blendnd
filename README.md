@@ -1,7 +1,7 @@
 # blendnd
 D&amp;D plugin for blender.
 
-![image](https://github.com/AEPSchmitt/blendnd/assets/9079958/e3b96d15-730f-4d29-a52f-f836ae886cd9)
+![image](https://github.com/AEPSchmitt/blendnd/assets/9079958/e23dd6ad-b7e1-4d52-95b7-a88b0541b73c)
 
 
 Join a room to synchronize object transforms with other people in the same room. Designed for virtual D&D but can also be used for other games. Download [**chess_test_scene.blend**](https://github.com/AEPSchmitt/blendnd/blob/main/chess_test_scene.blend) to try the addon with a game of chess.
