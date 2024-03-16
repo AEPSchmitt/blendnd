@@ -56,4 +56,4 @@ UNDO doesn't send a transform signal.
 - Import/export of Character Sheets
 
 ## Credit
-Many thanks to the awesome [Moltenbolt](https://www.youtube.com/watch?v=6yv3UevegsM) for this idea
+Many thanks to the awesome [Moltenbolt](https://www.youtube.com/watch?v=6yv3UevegsM) for this idea!
