@@ -37,5 +37,5 @@ Setting up your Python environment to access socketio may take more steps if you
 
 ## Planned features
 - Multi-object transforms
-- Character Sheets
+- Synchronization of Character Sheets
 - Dice rolling
