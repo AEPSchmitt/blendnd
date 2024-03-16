@@ -41,7 +41,6 @@ sio = socketio.Client()
 @sio.event
 def connect():
     bpy.utils.register_class(ROOM_PT_Panel)
-    bpy.types.WindowManager.my_sheet = PointerProperty(type=CharacterAttributes)
     bpy.utils.register_class(CHARACTER_ATTRIBUTES_PT_Panel)
     print("Connected to the server")
 
@@ -582,7 +581,6 @@ class DisconnectServer(bpy.types.Operator):
         if on_depsgraph_update in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(on_depsgraph_update)
         
-        del bpy.types.WindowManager.my_sheet
         return {'FINISHED'}
     
 class PingServer(bpy.types.Operator):
@@ -619,6 +617,7 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.WindowManager.dnd_properties = PointerProperty(type=DNDLoginProps)
     bpy.types.WindowManager.room_info = PointerProperty(type=RoomProps)
+    bpy.types.WindowManager.my_sheet = PointerProperty(type=CharacterAttributes)
     bpy.types.WindowManager.my_dice = PointerProperty(type=DiceAttributes)
     
         
