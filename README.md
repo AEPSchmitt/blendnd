@@ -48,6 +48,8 @@ Setting up your Python environment to access socketio may take more steps if you
 
 Only one object can be moved at a time.
 
+UNDO doesn't send a transform signal.
+
 ## Planned features
 - Multi-object transforms
 - Synchronization of Character Sheets
