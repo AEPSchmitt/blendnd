@@ -41,4 +41,3 @@ Only one object can be moved at a time.
 - Multi-object transforms
 - Synchronization of Character Sheets
 - Import/export of Character Sheets
-- Dice rolling
