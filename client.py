@@ -1,6 +1,6 @@
 import bpy
 import socketio
-
+import random as r
 from mathutils import Vector
 from bpy.props import (StringProperty,
                         PointerProperty,
@@ -157,7 +157,7 @@ class CharacterAttributes(bpy.types.PropertyGroup):
     name: StringProperty(
         name="Name",
         description="Your Name",
-        default="Kaladin"
+        default="Gandalf"
     )
     class_: StringProperty(
         name="Class",
@@ -257,6 +257,29 @@ class CharacterAttributes(bpy.types.PropertyGroup):
         description="Note to add"
     )
 
+class DiceAttributes(bpy.types.PropertyGroup):
+    count: IntProperty(
+        name="",
+        description="Amount of dice",
+        default=1,
+        min=0
+    )
+    sides: IntProperty(
+        name="D",
+        description="Dice sides",
+        default=20,
+        min=0
+    )
+    result: IntProperty(
+        name="result:",
+        description="Result of roll",
+        default=0,
+        min=0
+    )
+
+def get_dice():
+    return bpy.context.window_manager.my_dice
+
 def get_sheet():
     return bpy.context.window_manager.my_sheet
 
@@ -268,6 +291,22 @@ def get_room_info():
 
 def player_chosen(self):
     print(self)
+
+class RollDice(bpy.types.Operator):
+    bl_idname = "dice.roll"
+    bl_label = "roll"
+    bl_description="Roll Dice"
+    
+    def execute(self, context):
+        dice = get_dice()
+        print('rolling ', dice.count)
+        print('side: ', dice.sides)
+        res = 0
+        for i in range(dice.count):
+            res += r.randint(1, dice.sides)
+        print(res)
+        dice.result = res
+        return {'FINISHED'}
 
 class AddItem(bpy.types.Operator):
     bl_idname = "inventory.add"
@@ -459,7 +498,31 @@ class ChangeName(bpy.types.Operator):
         room = get_room_info()
         sio.emit('join', { 'room_id': login.room_id, 'name' : room.player_name})
         return {'FINISHED'}
+
+class DICE_PT_Panel(bpy.types.Panel):
+    bl_label = "Dice"
+    bl_idname = "DICE_PT_Panel"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "D&D"
+    bl_options = {'DEFAULT_CLOSED'}
     
+    def draw(self, context):
+        dice = get_dice()
+
+        layout = self.layout
+        row = layout.row()
+        row.label(icon="MESH_ICOSPHERE")
+        row.prop(dice, "count")
+        row.prop(dice, "sides")
+        
+        row = layout.row()
+        row.label(icon="FILE_3D")
+        row.operator("dice.roll", text="roll")
+        
+        row = layout.row()
+        row.prop(dice, "result")
+
 class SERVER_PT_Panel(bpy.types.Panel):
     bl_label = "Host"
     bl_idname = "SERVER_PT_Panel"
@@ -532,6 +595,8 @@ classes = (
     ConnectServer,
     DisconnectServer,
     CharacterAttributes,
+    DiceAttributes,
+    RollDice,
     OpenSettings,
     ChangeName,
     AddItem,
@@ -541,7 +606,8 @@ classes = (
     PingServer,
     DNDLoginProps,
     RoomProps,
-    CONNECTION_PT_Panel
+    CONNECTION_PT_Panel,
+    DICE_PT_Panel
 )
 
 def register():
@@ -549,6 +615,8 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.WindowManager.dnd_properties = PointerProperty(type=DNDLoginProps)
     bpy.types.WindowManager.room_info = PointerProperty(type=RoomProps)
+    bpy.types.WindowManager.my_dice = PointerProperty(type=DiceAttributes)
+    
         
 def unregister():
     for cls in classes:
