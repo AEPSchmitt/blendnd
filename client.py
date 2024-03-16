@@ -4,7 +4,8 @@ import socketio
 from mathutils import Vector
 from bpy.props import (StringProperty,
                         PointerProperty,
-                        EnumProperty)
+                        EnumProperty,
+                        IntProperty)
 
 
 bl_info = {
@@ -28,6 +29,8 @@ PLUGIN_VERSION = str(bl_info['version']).strip('() ').replace(',', '.')
 is_plugin_enabled = False
 
 group = []
+stuff = [("Bag of Holding", "Bag of Holding", "Bag of Holding")]
+notes = [("Your Notes", "Your Notes", "Your Notes")]
 
 class Config:
     ADDON_NAME = 'dnd_plugin'
@@ -37,7 +40,9 @@ class Config:
 sio = socketio.Client()
 @sio.event
 def connect():
-    bpy.utils.register_class(RoomPanel)
+    bpy.utils.register_class(ROOM_PT_Panel)
+    bpy.types.WindowManager.my_sheet = PointerProperty(type=CharacterAttributes)
+    bpy.utils.register_class(CHARACTER_ATTRIBUTES_PT_Panel)
     print("Connected to the server")
 
 # Define an event handler for the 'message' event
@@ -81,7 +86,7 @@ def action(data):
 # Define an event handler for the 'disconnect' event
 @sio.event
 def disconnect():
-    bpy.utils.unregister_class(RoomPanel)
+    bpy.utils.unregister_class(ROOM_PT_Panel)
     print("Disconnected from the server")
     
 # helpers
@@ -91,6 +96,12 @@ def vector_to_string(vector):
 def string_to_vector(string):
     components = list(map(float, string.split(',')))
     return Vector(components)
+
+def get_inventory(self, context):
+    return stuff
+
+def get_notes(self, context):
+    return notes
 
 def transformEvent(obj, scene, operation):
     sio.emit('action', {
@@ -136,6 +147,118 @@ class DNDLoginProps(bpy.types.PropertyGroup):
         default="( choose key )",
         description="Enter room name"
     )
+    donate : StringProperty(
+        name="",
+        default="https://ko-fi.com/aepschmitt",
+        description="Donation link"
+    )
+
+class CharacterAttributes(bpy.types.PropertyGroup):
+    name: StringProperty(
+        name="Name",
+        description="Your Name",
+        default="Kaladin"
+    )
+    class_: StringProperty(
+        name="Class",
+        description="Your Class",
+        default="Wizard"
+    )
+    health: IntProperty(
+        name="HP:",
+        description="Current Health",
+        default=10,
+        min=0
+    )
+    armor_class: IntProperty(
+        name="AC:",
+        description="Armor Class",
+        default=10,
+        min=0
+    )
+    initiative: IntProperty(
+        name="Init:",
+        description="Initiative",
+        default=10,
+        min=0
+    )
+    lvl: IntProperty(
+        name="LVL:",
+        description="Level",
+        default=1,
+        min=0
+    )
+    xp: IntProperty(
+        name="XP:",
+        description="Experience Points",
+        default=0,
+        min=0
+    )
+    health_max: IntProperty(
+        name="Max HP:",
+        description="Max Health",
+        default=20,
+        min=0
+    )
+    strength: IntProperty(
+        name="Strength",
+        description="Your Strength",
+        default=10,
+        min=0
+    )
+    dexterity: IntProperty(
+        name="Dexterity",
+        description="Your Dexterity",
+        default=10,
+        min=0
+    )
+    constitution: IntProperty(
+        name="Constitution",
+        description="Your Constitution",
+        default=10,
+        min=0
+    )
+    intelligence: IntProperty(
+        name="Intelligence",
+        description="Your Intelligence",
+        default=10,
+        min=0
+    )
+    wisdom: IntProperty(
+        name="Wisdom",
+        description="Your Wisdom",
+        default=10,
+        min=0
+    )
+    charisma: IntProperty(
+        name="Charisma",
+        description="Your Charisma",
+        default=10,
+        min=0
+    )
+    inventory : EnumProperty(
+        name="",
+        items=get_inventory,
+        description="Your stuff"
+    )
+    inventory_add : StringProperty(
+        name="",
+        default="new item",
+        description="Your stuff"
+    )
+    notes : EnumProperty(
+        name="",
+        items=get_notes,
+        description="Your private notes"
+    )
+    notes_add : StringProperty(
+        name="",
+        default="new note",
+        description="Note to add"
+    )
+
+def get_sheet():
+    return bpy.context.window_manager.my_sheet
 
 def get_players(self, context):
     return group
@@ -145,7 +268,55 @@ def get_room_info():
 
 def player_chosen(self):
     print(self)
+
+class AddItem(bpy.types.Operator):
+    bl_idname = "inventory.add"
+    bl_label = "add item"
+    bl_description="Add Item"
     
+    def execute(self, context):
+        my_sheet = get_sheet()
+        new_item = my_sheet.inventory_add
+        stuff.append((new_item, new_item, new_item))
+        return {'FINISHED'}
+    
+class RemoveItem(bpy.types.Operator):
+    bl_idname = "inventory.remove"
+    bl_label = "remove item"
+    bl_description="Remove Item"
+    
+    def execute(self, context):
+        my_sheet = get_sheet()
+        for item in stuff:
+            if item[0] == my_sheet.inventory:
+                stuff.remove(item)
+                break
+        return {'FINISHED'}
+    
+class AddNote(bpy.types.Operator):
+    bl_idname = "notes.add"
+    bl_label = "add note"
+    bl_description="Add Note"
+    
+    def execute(self, context):
+        my_sheet = get_sheet()
+        new_notes = my_sheet.notes_add
+        notes.append((new_notes, new_notes, new_notes))
+        return {'FINISHED'}
+    
+class RemoveNote(bpy.types.Operator):
+    bl_idname = "notes.remove"
+    bl_label = "remove note"
+    bl_description="Remove Note"
+    
+    def execute(self, context):
+        my_sheet = get_sheet()
+        for item in notes:
+            if item[0] == my_sheet.notes:
+                notes.remove(item)
+                break
+        return {'FINISHED'}
+
 class RoomProps(bpy.types.PropertyGroup):
     bl_idname = "room.info"
     players : EnumProperty(
@@ -162,9 +333,64 @@ class RoomProps(bpy.types.PropertyGroup):
 def get_id():
     return sio.sid
 
-class ConnectionPanel(bpy.types.Panel):
+class CHARACTER_ATTRIBUTES_PT_Panel(bpy.types.Panel):
+    bl_label = "Character Sheet"
+    bl_idname = "CHARACTER_ATTRIBUTES_PT_Panel"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "D&D"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        my_sheet = get_sheet()
+        if my_sheet:
+            attributes = my_sheet
+            
+            layout.row().prop(attributes, "name")
+            layout.row().prop(attributes, "class_")
+        
+            row = layout.row()
+            row.prop(attributes, "health")
+            row.prop(attributes, "health_max")
+            
+            row = layout.row()
+            row.prop(attributes, "armor_class")
+            row.prop(attributes, "initiative")
+            
+            row = layout.row()
+            row.prop(attributes, "lvl")
+            row.prop(attributes, "xp")
+            
+            layout.label(text="Stats", icon='TEXT')
+            box = layout.box()
+            col = box.column(align=True)
+            col.prop(attributes, "strength")
+            col.prop(attributes, "dexterity")
+            col.prop(attributes, "constitution")
+            col.prop(attributes, "intelligence")
+            col.prop(attributes, "wisdom")
+            col.prop(attributes, "charisma")
+            
+            layout.label(text="Inventory", icon='MOD_CLOTH')
+            row = layout.row()
+            row.prop(attributes, "inventory")
+            row.operator("inventory.remove", text="remove")
+            row = layout.row()
+            row.prop(attributes, "inventory_add")
+            row.operator("inventory.add", text="add")
+            
+            layout.label(text="Personal Notes", icon='HELP')
+            row = layout.row()
+            row.prop(attributes, "notes")
+            row.operator("notes.remove", text="erase")
+            row = layout.row()
+            row.prop(attributes, "notes_add")
+            row.operator("notes.add", text="add")
+
+class CONNECTION_PT_Panel(bpy.types.Panel):
     bl_label = "D&D Rooms"
-    bl_idname = "dnd.connect"
+    bl_idname = "CONNECTION_PT_Panel"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "D&D"
@@ -186,12 +412,16 @@ class ConnectionPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("server.custom", icon="MODIFIER", text="Settings")
+
+        layout.label(text="Donate", icon='FUND')
+        row = layout.row()
+        row.prop(login, "donate")
         
         
         
-class RoomPanel(bpy.types.Panel):
+class ROOM_PT_Panel(bpy.types.Panel):
     bl_label = "Room"
-    bl_idname = "dnd_act"
+    bl_idname = "ROOM_PT_Panel"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "D&D"
@@ -230,9 +460,9 @@ class ChangeName(bpy.types.Operator):
         sio.emit('join', { 'room_id': login.room_id, 'name' : room.player_name})
         return {'FINISHED'}
     
-class IPanel(bpy.types.Panel):
+class SERVER_PT_Panel(bpy.types.Panel):
     bl_label = "Host"
-    bl_idname = "dnd_ip"
+    bl_idname = "SERVER_PT_Panel"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "D&D"
@@ -271,7 +501,7 @@ class OpenSettings(bpy.types.Operator):
     bl_description="Settings"
     
     def execute(self, context):
-        bpy.utils.register_class(IPanel)
+        bpy.utils.register_class(SERVER_PT_Panel)
         return {'FINISHED'}
 
 class DisconnectServer(bpy.types.Operator):
@@ -284,6 +514,8 @@ class DisconnectServer(bpy.types.Operator):
         group = []
         if on_depsgraph_update in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(on_depsgraph_update)
+        
+        del bpy.types.WindowManager.my_sheet
         return {'FINISHED'}
     
 class PingServer(bpy.types.Operator):
@@ -299,12 +531,17 @@ class PingServer(bpy.types.Operator):
 classes = (
     ConnectServer,
     DisconnectServer,
+    CharacterAttributes,
     OpenSettings,
     ChangeName,
+    AddItem,
+    RemoveItem,
+    AddNote,
+    RemoveNote,
     PingServer,
     DNDLoginProps,
     RoomProps,
-    ConnectionPanel
+    CONNECTION_PT_Panel
 )
 
 def register():
@@ -316,7 +553,6 @@ def register():
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-    bpy.utils.unregister_class(IPanel)
         
 if __name__ == "__main__":
     register()
