@@ -159,6 +159,11 @@ class CharacterAttributes(bpy.types.PropertyGroup):
         description="Your Name",
         default="Gandalf"
     )
+    race: StringProperty(
+        name="Race",
+        description="Your Race",
+        default="Human"
+    )
     class_: StringProperty(
         name="Class",
         description="Your Class",
@@ -262,13 +267,13 @@ class DiceAttributes(bpy.types.PropertyGroup):
         name="",
         description="Amount of dice",
         default=1,
-        min=0
+        min=1
     )
     sides: IntProperty(
         name="D",
         description="Dice sides",
         default=20,
-        min=0
+        min=1
     )
     result: IntProperty(
         name="result:",
@@ -387,6 +392,7 @@ class CHARACTER_ATTRIBUTES_PT_Panel(bpy.types.Panel):
             attributes = my_sheet
             
             layout.row().prop(attributes, "name")
+            layout.row().prop(attributes, "race")
             layout.row().prop(attributes, "class_")
         
             row = layout.row()
