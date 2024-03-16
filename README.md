@@ -1,22 +1,21 @@
 # blendnd
 D&amp;D plugin for blender.
 
+Open your scenario scene, then join a room to synchronize object transforms with other people using the same room key. 
+
 ![image](https://github.com/AEPSchmitt/blendnd/assets/9079958/e23dd6ad-b7e1-4d52-95b7-a88b0541b73c)
 
-
-Join a room to synchronize object transforms with other people using the same room key. 
-
-
+Use the built-in Character Sheet to keep track of your stats.
 
 ![image](https://github.com/AEPSchmitt/blendnd/assets/9079958/3f4340c6-23c8-40cf-b611-ac4752b0f68b)
 
-Keep track of your stats.
+and roll dice from this handy menu:
 
 ![Screenshot from 2024-03-16 19-52-48](https://github.com/AEPSchmitt/blendnd/assets/9079958/c157a102-ba36-46af-98c5-05c6a504347f)
 
-and roll dice.
+Designed for virtual D&D but can also be used for other games.
 
-Designed for virtual D&D but can also be used for other games. Download [**chess_test_scene.blend**](https://github.com/AEPSchmitt/blendnd/blob/main/chess_test_scene.blend) to try the addon with a game of chess.
+Download [**chess_test_scene.blend**](https://github.com/AEPSchmitt/blendnd/blob/main/chess_test_scene.blend) to try the addon with a game of chess.
 
 ## Prerequisites
 0. Install [**socketio**](https://python-socketio.readthedocs.io/en/stable/client.html) and ensure Blender has access to the package (this may be an issue, depending on how you installed Blender)
