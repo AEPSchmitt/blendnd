@@ -454,9 +454,7 @@ class CONNECTION_PT_Panel(bpy.types.Panel):
 
         layout.label(text="Donate", icon='FUND')
         row = layout.row()
-        row.prop(login, "donate")
-        
-        
+        row.operator("wm.url_open", text="ko-fi.com/aepschmitt").url = "https://ko-fi.com/aepschmitt"
         
 class ROOM_PT_Panel(bpy.types.Panel):
     bl_label = "Room"
