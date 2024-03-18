@@ -48,7 +48,7 @@ Setting up your Python environment to access socketio may take more steps if you
 
 Only one object can be moved at a time.
 
-UNDO doesn't send a transform signal.
+The very first move, and moves done with UNDO doesn't send a transform signal.
 
 ## Planned features
 - Multi-object transforms
